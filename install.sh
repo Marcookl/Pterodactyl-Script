@@ -69,7 +69,7 @@ preflight(){
         warn "No support would be given if your server breaks at any point in the future."
         warn "Proceed?\n[1] Yes.\n[2] No."
         read choice
-        case $choice in 
+        case $choice in
             1)  output "Proceeding..."
                 ;;
             2)  output "Cancelling installation..."
@@ -90,7 +90,7 @@ preflight(){
         output "Proxmox LXE kernel detected. You have chosen to continue in the last step, therefore we are proceeding at your own risk."
         output "Proceeding with a risky operation..."
     elif echo $(uname -r) | grep -q stab; then
-        if echo $(uname -r) | grep -q 2.6; then 
+        if echo $(uname -r) | grep -q 2.6; then
             output "OpenVZ 6 detected. This server will definitely not work with Docker, regardless of what your provider might say. Exiting to avoid further damages."
             exit 6
         fi
@@ -117,7 +117,7 @@ os_check(){
     else
         exit 1
     fi
-    
+
     if [ "$lsb_dist" =  "ubuntu" ]; then
         if  [ "$dist_version" != "20.04" ] && [ "$dist_version" != "18.04" ] && [ "$dist_version" != "16.04" ]; then
             output "Unsupported Ubuntu version. Only Ubuntu 20.04, 18.04 and 16.04 are supported."
@@ -288,15 +288,15 @@ theme_options() {
         8 ) themeoption=8
             output "You have selected to install Fonix's BlackEnd Space theme."
             output ""
-            ;;        
+            ;;
         9 ) themeoption=9
             output "You have selected to install Fonix's Nothing But Graphite theme."
             output ""
-            ;;   
+            ;;
         * ) output "You did not enter a valid selection."
             theme_options
     esac
-}   
+}
 
 required_infos() {
     output "Please enter the desired user email address:"
@@ -307,7 +307,7 @@ required_infos() {
 dns_check(){
     output "Please enter your FQDN (panel.domain.tld):"
     read FQDN
-    
+
     output "Resolving DNS..."
     SERVER_IP=$(curl -s http://checkip.amazonaws.com)
     DOMAIN_RECORD=$(dig +short ${FQDN})
@@ -318,7 +318,7 @@ dns_check(){
         output "If you are using Cloudflare, please disable the orange cloud."
         output "If you do not have a domain, you can get a free one at https://freenom.com"
         dns_check
-    else 
+    else
         output "Domain resolved correctly. Good to go..."
     fi
 }
@@ -356,7 +356,7 @@ repositories_setup(){
         apt-get -y install software-properties-common dnsutils gpg-agent
         dpkg --remove-architecture i386
         echo 'Acquire::ForceIPv4 "true";' | sudo tee /etc/apt/apt.conf.d/99force-ipv4
-        apt-get -y update 
+        apt-get -y update
 	    curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash
         if [ "$lsb_dist" =  "ubuntu" ]; then
             LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php
@@ -366,7 +366,7 @@ repositories_setup(){
                 add-apt-repository -y ppa:nginx/development
             fi
 	        apt -y install tuned
-            tuned-adm profile latency-performance   
+            tuned-adm profile latency-performance
         elif [ "$lsb_dist" =  "debian" ]; then
             apt-get -y install ca-certificates apt-transport-https
             echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/php.list
@@ -384,10 +384,10 @@ repositories_setup(){
                 sudo add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://nyc2.mirrors.digitalocean.com/mariadb/repo/10.4/debian stretch main'
             fi
         fi
-        apt-get -y update 
+        apt-get -y update
         apt-get -y upgrade
         apt-get -y autoremove
-        apt-get -y autoclean   
+        apt-get -y autoclean
         apt-get -y install dnsutils curl
     elif  [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "centos" ]; then
         if  [ "$lsb_dist" =  "fedora" ] ; then
@@ -474,7 +474,7 @@ install_dependencies(){
         if [ "$dist_version" = "8" ]; then
 	        dnf -y install MariaDB-server MariaDB-client --disablerepo=AppStream
         fi
-	else 
+	else
 	    dnf -y install MariaDB-server
 	fi
 	dnf -y module install php:remi-7.3
@@ -482,7 +482,7 @@ install_dependencies(){
             dnf -y install redis nginx git policycoreutils-python-utils unzip wget expect jq php-mysql php-zip php-bcmath tar
         elif [ "$webserver" = "2" ]; then
             dnf -y install redis httpd git policycoreutils-python-utils mod_ssl unzip wget expect jq php-mysql php-zip php-mcmath tar
-        fi    
+        fi
     fi
 
     output "Enabling Services..."
@@ -497,7 +497,7 @@ install_dependencies(){
         systemctl enable php-fpm
         service php-fpm start
     fi
-    
+
     systemctl enable cron
     systemctl enable mariadb
 
@@ -555,10 +555,10 @@ install_pterodactyl() {
 		sed -i '/\[mysqld\]/a bind-address = 0.0.0.0' /etc/mysql/mariadb.conf.d/50-server.cnf
 		output 'Restarting MySQL process...'
 		service mysql restart
-	else 
+	else
 		output 'File my.cnf was not found! Please contact support.'
 	fi
-    
+
     output "Downloading Pterodactyl..."
     mkdir -p /var/www/pterodactyl
     cd /var/www/pterodactyl
@@ -645,7 +645,7 @@ EOF
 upgrade_pterodactyl(){
     cd /var/www/pterodactyl
     php artisan down
-    curl -L https://github.com/pterodactyl/panel/releases/download/v0.7.17/panel.tar.gz | tar --strip-components=1 -xzv
+    curl -L https://github.com/pterodactyl/panel/releases/download/v0.7.16/panel.tar.gz | tar --strip-components=1 -xzv
     chmod -R 755 storage/* bootstrap/cache
     composer install --no-dev --optimize-autoloader
     php artisan view:clear
@@ -669,7 +669,7 @@ nginx_config() {
     output "Disabling default configuration..."
     rm -rf /etc/nginx/sites-enabled/default
     output "Configuring Nginx Webserver..."
-    
+
 echo '
 server_tokens off;
 set_real_ip_from 103.21.244.0/22;
@@ -765,7 +765,7 @@ echo '
   ServerName '"$FQDN"'
   RewriteEngine On
   RewriteCond %{HTTPS} !=on
-  RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L] 
+  RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
 </VirtualHost>
 <VirtualHost *:443>
   ServerName '"$FQDN"'
@@ -779,9 +779,9 @@ echo '
   SSLEngine on
   SSLCertificateFile /etc/letsencrypt/live/'"$FQDN"'/fullchain.pem
   SSLCertificateKeyFile /etc/letsencrypt/live/'"$FQDN"'/privkey.pem
-</VirtualHost> 
+</VirtualHost>
 ' | sudo -E tee /etc/apache2/sites-available/pterodactyl.conf >/dev/null 2>&1
-    
+
     ln -s /etc/apache2/sites-available/pterodactyl.conf /etc/apache2/sites-enabled/pterodactyl.conf
     a2enmod ssl
     a2enmod rewrite
@@ -790,7 +790,7 @@ echo '
 
 nginx_config_redhat(){
     output "Configuring Nginx web server..."
-    
+
 echo '
 server_tokens off;
 set_real_ip_from 103.21.244.0/22;
@@ -830,7 +830,7 @@ server {
     # allow larger file uploads and longer script runtimes
     client_max_body_size 100m;
     client_body_timeout 120s;
-    
+
     sendfile off;
     # strengthen ssl security
     ssl_certificate /etc/letsencrypt/live/'"$FQDN"'/fullchain.pem;
@@ -839,7 +839,7 @@ server {
     ssl_prefer_server_ciphers on;
     ssl_session_cache shared:SSL:10m;
     ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:ECDHE-RSA-AES128-GCM-SHA256:AES256+EECDH:DHE-RSA-AES128-GCM-SHA256:AES256+EDH:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4";
-    
+
     # See the link below for more SSL information:
     #     https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
     #
@@ -888,7 +888,7 @@ echo '
   ServerName '"$FQDN"'
   RewriteEngine On
   RewriteCond %{HTTPS} !=on
-  RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L] 
+  RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
 </VirtualHost>
 <VirtualHost *:443>
   ServerName '"$FQDN"'
@@ -900,7 +900,7 @@ echo '
   SSLEngine on
   SSLCertificateFile /etc/letsencrypt/live/'"$FQDN"'/fullchain.pem
   SSLCertificateKeyFile /etc/letsencrypt/live/'"$FQDN"'/privkey.pem
-</VirtualHost> 
+</VirtualHost>
 ' | sudo -E tee /etc/httpd/conf.d/pterodactyl.conf >/dev/null 2>&1
     service httpd restart
 }
@@ -963,9 +963,9 @@ install_daemon() {
         output "Installing Docker"
         curl -sSL https://get.docker.com/ | CHANNEL=stable bash
     fi
-    
+
     service docker start
-    systemctl enable docker 
+    systemctl enable docker
     output "Enabling SWAP support for Docker & installing NodeJS..."
     sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& swapaccount=1/' /etc/default/grub
     if  [ "$lsb_dist" =  "ubuntu" ] ||  [ "$lsb_dist" =  "debian" ]; then
@@ -979,7 +979,7 @@ install_daemon() {
             else
                 apt -y install nodejs make gcc g++ node-gyp
             fi
-        apt-get -y update 
+        apt-get -y update
         apt-get -y upgrade
         apt-get -y autoremove
         apt-get -y autoclean
@@ -1061,7 +1061,7 @@ install_standalone_sftp(){
         rm -rf /tmp/core
     elif [ $(cat /srv/daemon/config/core.json | jq -r '.sftp.enabled') == "false" ]; then
        output "Config already set up for Golang SFTP server."
-    else 
+    else
        output "You may have purposely set the SFTP to true which will cause this to fail."
     fi
     service wings restart
@@ -1138,7 +1138,7 @@ install_phpmyadmin(){
 \$cfg['SaveDir'] = '';
 \$cfg['CaptchaLoginPublicKey'] = '6LcJcjwUAAAAAO_Xqjrtj9wWufUpYRnK6BW8lnfn';
 \$cfg['CaptchaLoginPrivateKey'] = '6LcJcjwUAAAAALOcDJqAEYKTDhwELCkzUkNDQ0J5'
-?>    
+?>
 EOF
     output "Installation completed."
     if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
@@ -1213,7 +1213,7 @@ ssl_certs(){
             elif [ "$webserver" = "2" ]; then
                 (crontab -l ; echo '0 0,12 * * * ./certbot-auto renew --pre-hook "service apache2 stop" --pre-hook "service wings stop" --post-hook "service apache2 restart" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
             fi
-        fi            
+        fi
     elif [ "$lsb_dist" =  "debian" ] || [ "$lsb_dist" =  "ubuntu" ]; then
         if [ "$installoption" = "1" ]; then
             if [ "$webserver" = "1" ]; then
@@ -1229,7 +1229,7 @@ ssl_certs(){
             elif [ "$webserver" = "2" ]; then
                 (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service apache2 stop" --pre-hook "service wings stop" --post-hook "service apache2 restart" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
             fi
-        fi    
+        fi
     elif [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
         if [ "$installoption" = "1" ]; then
             if [ "$webserver" = "1" ]; then
@@ -1245,7 +1245,7 @@ ssl_certs(){
             elif [ "$webserver" = "2" ]; then
                 (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service httpd stop" --pre-hook "service wings stop" --post-hook "service httpd restart" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
             fi
-        fi    
+        fi
     fi
 }
 
@@ -1264,7 +1264,7 @@ firewall(){
         apt -y install fail2ban
     elif [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "rhel" ]; then
         yum -y install fail2ban
-    fi 
+    fi
     systemctl enable fail2ban
     bash -c 'cat > /etc/fail2ban/jail.local' <<-'EOF'
 [DEFAULT]
@@ -1296,25 +1296,25 @@ EOF
             ufw allow 2022
             ufw allow 3306
         fi
-        yes |ufw enable 
+        yes |ufw enable
     elif [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "rhel" ]; then
         yum -y install firewalld
         systemctl enable firewalld
         systemctl start firewalld
         if [ "$installoption" = "1" ]; then
             firewall-cmd --add-service=http --permanent
-            firewall-cmd --add-service=https --permanent 
-            firewall-cmd --add-service=mysql --permanent 
+            firewall-cmd --add-service=https --permanent
+            firewall-cmd --add-service=mysql --permanent
         elif [ "$installoption" = "2" ]; then
             firewall-cmd --permanent --add-service=80/tcp
             firewall-cmd --permanent --add-port=2022/tcp
             firewall-cmd --permanent --add-port=8080/tcp
         elif [ "$installoption" = "3" ]; then
             firewall-cmd --add-service=http --permanent
-            firewall-cmd --add-service=https --permanent 
+            firewall-cmd --add-service=https --permanent
             firewall-cmd --permanent --add-port=2022/tcp
             firewall-cmd --permanent --add-port=8080/tcp
-            firewall-cmd --permanent --add-service=mysql 
+            firewall-cmd --permanent --add-service=mysql
         fi
     fi
 }
@@ -1327,13 +1327,13 @@ block_icmp(){
     read icmp
     case $icmp in
         1 ) /sbin/iptables -t mangle -A PREROUTING -p icmp -j DROP
-            (crontab -l ; echo "@reboot /sbin/iptables -t mangle -A PREROUTING -p icmp -j DROP >> /dev/null 2>&1")| crontab - 
+            (crontab -l ; echo "@reboot /sbin/iptables -t mangle -A PREROUTING -p icmp -j DROP >> /dev/null 2>&1")| crontab -
             ;;
         2 ) output "Skipping rule..."
             ;;
         * ) output "You did not enter a valid selection."
             block_icmp
-    esac    
+    esac
 }
 
 javapipe_kernel(){
@@ -1348,7 +1348,7 @@ javapipe_kernel(){
             ;;
         * ) output "You did not enter a valid selection."
             javapipe_kernel
-    esac 
+    esac
 }
 
 install_database() {
@@ -1358,7 +1358,7 @@ install_database() {
         if [ "$dist_version" = "8" ]; then
 	        dnf -y install MariaDB-server MariaDB-client --disablerepo=AppStream
         fi
-	else 
+	else
 	    dnf -y install MariaDB-server
 	fi
 
@@ -1395,7 +1395,7 @@ install_database() {
 		sed -i '/\[mysqld\]/a bind-address = 0.0.0.0' /etc/my.cnf
 		output 'Restarting MySQL process...'
 		service mysql restart
-	else 
+	else
 		output 'File my.cnf was not found! Please contact support.'
 	fi
 
@@ -1404,7 +1404,7 @@ install_database() {
     elif [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "rhel" ]; then
         firewall-cmd --permanent --add-service=mysql
         firewall-cmd --reload
-    fi 
+    fi
 
     broadcast_database
 }
@@ -1459,7 +1459,7 @@ broadcast_database(){
 #Execution
 preflight
 install_options
-case $installoption in 
+case $installoption in
     1)  webserver_options
         theme_options
         repositories_setup
